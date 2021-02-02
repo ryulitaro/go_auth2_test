@@ -49,23 +49,17 @@ func internalErrorHandler(err error) (re *errors.Response) {
 }
 
 func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
-	log.Println("userAuthorizeHandler")
-
 	store, err := session.Start(r.Context(), w, r)
 	if err != nil {
 		return
 	}
 
 	uid, ok := store.Get("LoggedInUserID")
-	log.Println("userAuthorizeHandler", uid)
 
 	if !ok {
 		if r.Form == nil {
 			r.ParseForm()
 		}
-
-		log.Println("userAuthorizeHandler", r.Form)
-
 		store.Set("ReturnUri", r.Form)
 		store.Save()
 
