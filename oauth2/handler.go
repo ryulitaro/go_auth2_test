@@ -1,7 +1,6 @@
 package oauth2
 
 import (
-	"log"
 	"net/http"
 	"os"
 
@@ -9,8 +8,6 @@ import (
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("loginHandler", r.Method)
-
 	store, err := session.Start(r.Context(), w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -18,8 +15,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		log.Println("loginHandler", r.Form)
-
 		if r.Form == nil {
 			if err := r.ParseForm(); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -29,8 +24,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		store.Set("LoggedInUserID", r.Form.Get("username"))
 		store.Save()
 
-		log.Println("loginHandler", r.Form.Get("username"), r.Form.Get("password"))
-
 		w.Header().Set("Location", "/auth")
 		w.WriteHeader(http.StatusFound)
 		return
@@ -39,8 +32,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("authHandler")
-
 	store, err := session.Start(nil, w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -48,7 +39,6 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, ok := store.Get("LoggedInUserID"); !ok {
-		log.Println(store.Get("LoggedInUserID"))
 		w.Header().Set("Location", "/login")
 		w.WriteHeader(http.StatusFound)
 		return
@@ -58,7 +48,6 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {
-	log.Println("outputHTML", filename, req.Header)
 	file, err := os.Open(filename)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
@@ -67,5 +56,4 @@ func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {
 	defer file.Close()
 	fi, _ := file.Stat()
 	http.ServeContent(w, req, file.Name(), fi.ModTime(), file)
-	log.Println("outputHTML", w.Header())
 }

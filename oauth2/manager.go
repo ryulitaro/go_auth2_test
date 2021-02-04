@@ -12,6 +12,7 @@ import (
 )
 
 var redisUri string
+var client models.Client
 
 func NewManager() (*manage.Manager, error) {
 	if redisUri == "" {
@@ -21,26 +22,24 @@ func NewManager() (*manage.Manager, error) {
 		}
 
 		redisUri = viper.GetString("REDIS_URL") + ":" + viper.GetString("REDIS_PORT")
+		client = models.Client{
+			ID:     viper.GetString("CLIENT_ID"),
+			Secret: viper.GetString("CLIENT_SECRETE"),
+		}
 	}
 
 	manager := manage.NewDefaultManager()
 
-	// use redis token store
 	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
 		Addr:     redisUri,
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	}))
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
-
-	// generate jwt access token
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate("", []byte("00000000"), jwt.SigningMethodHS512))
 
 	clientStore := store.NewClientStore()
-	clientStore.Set("222222", &models.Client{
-		ID:     "222222",
-		Secret: "22222222",
-	})
+	clientStore.Set(client.ID, &client)
 	manager.MapClientStorage(clientStore)
 	return manager, nil
 }

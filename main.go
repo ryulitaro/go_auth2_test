@@ -18,8 +18,7 @@ func main() {
 
 	http.HandleFunc("/token", oauth2.Token)
 
-	http.HandleFunc("/profile", oauth2.Profile)
+	http.HandleFunc("/tokeninfo", oauth2.TokenInfo)
 
-	log.Println("Server is running at 9096 port.")
 	log.Fatal(http.ListenAndServe(":9096", nil))
 }
